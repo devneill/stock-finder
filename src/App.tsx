@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { fetchStock } from './utils';
 
 function App() {
-  const [stock, setStock] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [stockTicker, setStockTicker] = useState('WMT');
+  const [startDate, setStartDate] = useState('2017-09-28');
+  const [endDate, setEndDate] = useState('2017-10-15');
+  const [stockData, setStockData] = useState(null);
 
   function changeStock(event) {
-    setStock(event.target.value);
+    setStockTicker(event.target.value);
   }
   function changeStartDate(event) {
     setStartDate(event.target.value);
@@ -16,6 +18,17 @@ function App() {
   function changeEndDate(event) {
     setEndDate(event.target.value);
   }
+
+  useEffect(() => {
+    if (!stockTicker || !startDate || !endDate) {
+      return;
+    }
+    setStockData(null);
+    fetchStock(stockTicker, startDate, endDate).then((data) => {
+      setStockData(data);
+      // console.log(data);
+    });
+  }, [stockTicker, startDate, endDate]);
 
   return (
     <div>
@@ -28,7 +41,7 @@ function App() {
             <form onSubmit={() => console.log('hi')}>
               <label>
                 Ticker:
-                <input type="text" value={stock} onChange={changeStock} />
+                <input type="text" value={stockTicker} onChange={changeStock} />
               </label>
               <label>
                 Start date:
@@ -45,11 +58,16 @@ function App() {
               <input type="submit" value="Submit" />
             </form>
           </section>
-          <section>
-            <p>Graph here for {stock}</p>
-            <p>{startDate}</p>
-            <p>{endDate}</p>
-          </section>
+          {stockData && (
+            <section>
+              <p>Graph here for {stockTicker}</p>
+              {stockData}
+              <p>Max drawdown</p>
+              <p>Simple return</p>
+              <p>{startDate}</p>
+              <p>{endDate}</p>
+            </section>
+          )}
         </article>
       </main>
     </div>
